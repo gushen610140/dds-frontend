@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineProps, ref, onMounted } from "vue";
-import { ECharts, EChartsOption, init } from "echarts";
+import { init } from "echarts";
 import { updateDecision } from "../api/decision";
 
 const { item } = defineProps(["item"]);
@@ -43,23 +43,30 @@ const initChart = (): void => {
   buildChart.setOption(option.value);
 };
 
-// TODO: 投票响应式
-const vote = (action) => {
-  updateDecision(item.id, action);
+const dialogMessage = ref("")
+const vote = async (action: string) => {
+  const {code} = await updateDecision(item.id, action);
+  if (code === 401) {
+    return;
+  }
   switch (action) {
     case "agree":
       item.agree++;
       option.value.series[0].data[1].value++;
       break;
-    case "reject":
-      item.reject++;
-      option.value.series[0].data[2].value++;
-      break;
     case "waive":
       item.waive++;
+      option.value.series[0].data[2].value++;
+      break;
+    case "reject":
+      item.reject++;
       option.value.series[0].data[3].value++;
       break;
   }
+  item.pending--;
+  option.value.series[0].data[0].value--;
+  buildChart!.setOption(option.value);
+  buildChart!.resize();
 };
 
 onMounted(() => {
@@ -74,8 +81,12 @@ onMounted(() => {
     :text="item.description"
     class="w-11/12"
   >
-    <div class="w-full flex justify-center h-[160px]">
+    <div class="w-full flex justify-center h-[160px] mt-8 mb-8">
       <div ref="chart" class="h-[160px] w-11/12"></div>
+    </div>
+    <div class="w-full flex flex-col items-end text-sm text-gray-800 mb-2">
+      <div class="mr-4">{{ item.create_time.split(" ")[0] }}</div>
+      <div class="mr-4">{{ item.creator }}</div>
     </div>
     <v-card-actions class="flex justify-end">
       <v-dialog
@@ -96,7 +107,7 @@ onMounted(() => {
         </template>
         <template v-slot:default="{ isActive }">
           <v-card title="提示">
-            <v-card-text> {{ property.text }}成功 </v-card-text>
+            <v-card-text> {{ dialogMessage }} </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn text="确认" @click="isActive.value = false"></v-btn>

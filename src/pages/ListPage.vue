@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import http from "../utils/http";
+import { ref } from "vue";
 import { router } from "../routes";
 import { getDecisions } from "../api/decision.ts";
 import DecisionCard from "../components/DecisionCard.vue";

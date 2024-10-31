@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import http from "../utils/http.ts";
 import { router } from "../routes";
 import { addDecision } from "../api/decision";
 

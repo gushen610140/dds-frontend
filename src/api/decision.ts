@@ -1,3 +1,4 @@
+import { useUserStore } from "../stores/useUserStore";
 import http from "../utils/http";
 
 export const getDecisions = async (current: number, size: number) => {
@@ -19,6 +20,7 @@ export const addDecision = async (title: string, description: string) => {
     data: {
       title,
       description,
+      creator: useUserStore().name,
     },
   });
   return data;
@@ -31,6 +33,7 @@ export const updateDecision = async (decision_id: string, action: string) => {
     data: {
       decision_id,
       action,
+      voter: useUserStore().name,
     },
   });
   return data;
